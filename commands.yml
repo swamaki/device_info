@@ -1,0 +1,71 @@
+commands:
+# - show configuration | no-more 
+# - show configuration | display set | no-more
+# - show run | no 
+- term len 0
+- show run
+# - show version
+# - show module
+# - show cdp neighbor | ex SEP
+# - show cdp neighbor detail
+# - show ip interface brief | exclude unass
+# - show standby brief
+# - show interface status
+# - show interface status | include connected
+# - show interface trunk
+# - show int etherchannel
+# - show etherchannel summary
+# - show interface description
+# - show vtp status
+# - show vlan
+# - show vlan brief
+# - show spanning-tree root
+# - show spanning-tree brief
+# - show ip route
+# - show ip default
+# - show ip eigrp neighbors
+# - show ip eigrp interface
+# - show ip route eigrp
+# - show ip eigrp topology
+# - show ip ospf neig
+# - show ip ospf interface
+# - show ip route ospf
+# - show ip ospf database
+# - show ip bgp summary
+# - show ip bgp
+# - show ip route bgp
+# - show ip route static
+# - show ip route
+# - show ip pim neighbor
+# - show ip rp mapping
+# - show ip mroute
+# - show proc cpu sorted
+# - show proc cpu history
+
+#==============================
+
+# - show configuration | display set | no-more 
+# - show  version
+# - show chassis hardware 
+# - show chassis environment
+# - show system uptime
+# - show chassis alarms
+# - show system alarms
+# - show lacp interfaces
+# - show lldp neighbors
+# - show interfaces terse 
+# - show interfaces extensive
+# - show interfaces descriptions
+# - show vrrp
+# - show vrrp brief
+# - show route
+# - show route protocol ospf 
+# - show route protocol bgp
+# - show ospf neighbor 
+# - show ospf interface brief
+# - show ospf database
+# - show bgp neighbor
+# - show bgp summary
+# - show pim neighbor
+# - show pim rps
+# - show route protocol pim 
