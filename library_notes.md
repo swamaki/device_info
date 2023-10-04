@@ -1,0 +1,132 @@
+(venv383) ➜ netdevops pip install netdev
+Collecting netdev
+Using cached netdev-0.9.3-py3-none-any.whl (37 kB)
+Collecting PyYAML<6.0,>=5.1 (from netdev)
+Using cached PyYAML-5.4.1-cp38-cp38-macosx_10_9_x86_64.whl (253 kB)
+Collecting asyncssh<2.0,>=1.15 (from netdev)
+Using cached asyncssh-1.18.0-py3-none-any.whl (291 kB)
+Requirement already satisfied: cryptography>=2.7 in /Users/stephenamaki/Downloads/venv383/lib/python3.8/site-packages (from asyncssh<2.0,>=1.15->netdev) (41.0.4)
+Requirement already satisfied: cffi>=1.12 in /Users/stephenamaki/Downloads/venv383/lib/python3.8/site-packages (from cryptography>=2.7->asyncssh<2.0,>=1.15->netdev) (1.16.0)
+Requirement already satisfied: pycparser in /Users/stephenamaki/Downloads/venv383/lib/python3.8/site-packages (from cffi>=1.12->cryptography>=2.7->asyncssh<2.0,>=1.15->netdev) (2.21)
+Installing collected packages: PyYAML, asyncssh, netdev
+Attempting uninstall: PyYAML
+Found existing installation: PyYAML 6.0.1
+Uninstalling PyYAML-6.0.1:
+Successfully uninstalled PyYAML-6.0.1
+Successfully installed PyYAML-5.4.1 asyncssh-1.18.0 netdev-0.9.3
+(venv383) ➜ netdevops
+
+---
+
+(venv383) ➜ device_inventory git:(main) ✗ ./audit_async_netdev.py
+/Users/stephenamaki/Downloads/venv383/lib/python3.8/site-packages/asyncssh/crypto/cipher.py:27: CryptographyDeprecationWarning: Blowfish has been deprecated
+from cryptography.hazmat.primitives.ciphers.algorithms import Blowfish, CAST5
+/Users/stephenamaki/Downloads/venv383/lib/python3.8/site-packages/asyncssh/crypto/cipher.py:27: CryptographyDeprecationWarning: CAST5 has been deprecated
+from cryptography.hazmat.primitives.ciphers.algorithms import Blowfish, CAST5
+Running commands on ROUTER-1
+It took 1.0148611068725586 seconds to run
+(venv383) ➜ device_inventory git:(main) ✗
+(venv383) ➜ device_inventory git:(main) ✗
+(venv383) ➜ device_inventory git:(main) ✗
+(venv383) ➜ device_inventory git:(main) ✗ ./audit_async_netdev.py
+/Users/stephenamaki/Downloads/venv383/lib/python3.8/site-packages/asyncssh/crypto/cipher.py:27: CryptographyDeprecationWarning: Blowfish has been deprecated
+from cryptography.hazmat.primitives.ciphers.algorithms import Blowfish, CAST5
+/Users/stephenamaki/Downloads/venv383/lib/python3.8/site-packages/asyncssh/crypto/cipher.py:27: CryptographyDeprecationWarning: CAST5 has been deprecated
+from cryptography.hazmat.primitives.ciphers.algorithms import Blowfish, CAST5
+Running commands on ROUTER-1
+Running commands on ROUTER-2
+It took 1.3786580562591553 seconds to run
+(venv383) ➜ device_inventory git:(main) ✗ ./audit_async_netdev.py
+/Users/stephenamaki/Downloads/venv383/lib/python3.8/site-packages/asyncssh/crypto/cipher.py:27: CryptographyDeprecationWarning: Blowfish has been deprecated
+from cryptography.hazmat.primitives.ciphers.algorithms import Blowfish, CAST5
+/Users/stephenamaki/Downloads/venv383/lib/python3.8/site-packages/asyncssh/crypto/cipher.py:27: CryptographyDeprecationWarning: CAST5 has been deprecated
+from cryptography.hazmat.primitives.ciphers.algorithms import Blowfish, CAST5
+Running commands on ROUTER-1
+Running commands on ROUTER-3
+Running commands on ROUTER-2
+It took 1.44881010055542 seconds to run
+(venv383) ➜ device_inventory git:(main) ✗
+(venv383) ➜ device_inventory git:(main) ✗ ./audit_async_netdev.py
+/Users/stephenamaki/Downloads/venv383/lib/python3.8/site-packages/asyncssh/crypto/cipher.py:27: CryptographyDeprecationWarning: Blowfish has been deprecated
+from cryptography.hazmat.primitives.ciphers.algorithms import Blowfish, CAST5
+/Users/stephenamaki/Downloads/venv383/lib/python3.8/site-packages/asyncssh/crypto/cipher.py:27: CryptographyDeprecationWarning: CAST5 has been deprecated
+from cryptography.hazmat.primitives.ciphers.algorithms import Blowfish, CAST5
+Running commands on ROUTER-1
+Running commands on ROUTER-3
+Running commands on ROUTER-4
+Running commands on ROUTER-2
+It took 1.5801341533660889 seconds to run
+(venv383) ➜ device_inventory git:(main) ✗
+
+(venv38) ➜ device_inventory git:(main) ✗ ./audit_async_netdev.py
+/Users/stephenamaki/Dropbox/netdevops/virtualenvs/venv38/lib/python3.8/site-packages/asyncssh/crypto/cipher.py:27: CryptographyDeprecationWarning: Blowfish has been deprecated
+from cryptography.hazmat.primitives.ciphers.algorithms import Blowfish, CAST5
+/Users/stephenamaki/Dropbox/netdevops/virtualenvs/venv38/lib/python3.8/site-packages/asyncssh/crypto/cipher.py:27: CryptographyDeprecationWarning: CAST5 has been deprecated
+from cryptography.hazmat.primitives.ciphers.algorithms import Blowfish, CAST5
+Running commands on ROUTER-1
+Running commands on ROUTER-4
+Running commands on ROUTER-2
+Running commands on ROUTER-3
+It took 1.5734422206878662 seconds to run
+(venv38) ➜ device_inventory git:(main) ✗
+(venv38) ➜ device_inventory git:(main) ✗
+
+# ====================================
+
+====================================
+
+(netdevops) ➜ device_inventory git:(main) ✗ ./audit_async.py
+/Users/stephenamaki/Dropbox/netdevops/myscripts/device_inventory/./audit_async.py:168: DeprecationWarning: There is no current event loop
+loop = asyncio.get_event_loop()
+Running commands on ROUTER-1
+It took 1.70306396484375 seconds to run
+(netdevops) ➜ device_inventory git:(main) ✗
+(netdevops) ➜ device_inventory git:(main) ✗
+(netdevops) ➜ device_inventory git:(main) ✗ ./audit_async.py
+/Users/stephenamaki/Dropbox/netdevops/myscripts/device_inventory/./audit_async.py:168: DeprecationWarning: There is no current event loop
+loop = asyncio.get_event_loop()
+Running commands on ROUTER-1
+Running commands on ROUTER-2
+It took 3.719013214111328 seconds to run
+(netdevops) ➜ device_inventory git:(main) ✗ ./audit_async.py
+/Users/stephenamaki/Dropbox/netdevops/myscripts/device_inventory/./audit_async.py:168: DeprecationWarning: There is no current event loop
+loop = asyncio.get_event_loop()
+Running commands on ROUTER-1
+Running commands on ROUTER-2
+Running commands on ROUTER-3
+It took 5.899400949478149 seconds to run
+(netdevops) ➜ device_inventory git:(main) ✗ ./audit_async.py
+/Users/stephenamaki/Dropbox/netdevops/myscripts/device_inventory/./audit_async.py:168: DeprecationWarning: There is no current event loop
+loop = asyncio.get_event_loop()
+Running commands on ROUTER-1
+Running commands on ROUTER-2
+Running commands on ROUTER-3
+Running commands on ROUTER-4
+It took 7.917018175125122 seconds to run
+(netdevops) ➜ device_inventory git:(main) ✗
+
+(netdevops) ➜ device_inventory git:(main) ✗ ./audit_async.py
+/Users/stephenamaki/Dropbox/netdevops/myscripts/device_inventory/./audit_async.py:168: DeprecationWarning: There is no current event loop
+loop = asyncio.get_event_loop()
+Running commands on ROUTER-1
+Running commands on ROUTER-2
+Running commands on ROUTER-3
+Running commands on ROUTER-4
+<class '\_asyncio.Task'>
+<class '\_asyncio.Task'>
+<class '\_asyncio.Task'>
+<class '\_asyncio.Task'>
+It took 7.718329906463623 seconds to run
+(netdevops) ➜ device_inventory git:(main) ✗
+
+(netdevops) ➜ device_inventory git:(main) ✗ ./audit_async.py
+/Users/stephenamaki/Dropbox/netdevops/myscripts/device_inventory/./audit_async.py:168: DeprecationWarning: There is no current event loop
+loop = asyncio.get_event_loop()
+Running commands on ROUTER-1
+['__await__', '__class__', '__class_getitem__', '__del__', '__delattr__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '_asyncio_future_blocking', '_callbacks', '_cancel_message', '_coro', '_exception', '_fut_waiter', '_log_destroy_pending', '_log_traceback', '_loop', '_make_cancelled_error', '_must_cancel', '_result', '_source_traceback', '_state', 'add_done_callback', 'cancel', 'cancelled', 'cancelling', 'done', 'exception', 'get_context', 'get_coro', 'get_loop', 'get_name', 'get_stack', 'print_stack', 'remove_done_callback', 'result', 'set_exception', 'set_name', 'set_result', 'uncancel']
+It took 1.6259629726409912 seconds to run
+(netdevops) ➜ device_inventory git:(main) ✗
+
+=========================================
+
+=========================================

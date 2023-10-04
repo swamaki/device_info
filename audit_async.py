@@ -7,41 +7,34 @@ from decouple import config
 import re
 import yaml
 import asyncio
-import netdev
+from netmiko import ConnectHandler
+import sys
 
-"""
-works as of 
-
-"""
+# from netmiko.ssh_exception import NetMikoTimeoutException
+# from netmiko.ssh_exception import AuthenticationException
 
 COMMANDS_FILE = "commands.yml"
 INVENTORY_FILE = "devices.yml"
 
+# creds defined in ./.env file
 GLOBAL_DEVICE_PARAMS = {
     "device_type": "cisco_ios",
     "username": config("USER_NAME"),
     "password": config("PASSWORD"),
 }
 
-# from getpass import getpass
-# USER_NAME = input("Enter your SSH username:")
-# PASSWORD = getpass()
-
-# GLOBAL_DEVICE_PARAMS = {
-#     "device_type": "cisco_ios",
-#     "username": USER_NAME,
-#     "password": PASSWORD,
-# }
 
 def get_devices_list(file_name=INVENTORY_FILE):
     with open(file_name) as f:
         result = yaml.safe_load(f)
     return result["devices"]
 
+
 def get_commmands_list(file_name=COMMANDS_FILE):
     with open(file_name) as f:
         result = yaml.safe_load(f)
     return result["commands"]
+
 
 def extract_hostname(sh_ver):
     device_hostname = dict()
@@ -49,8 +42,8 @@ def extract_hostname(sh_ver):
         device_hostname.update(regexp.search(sh_ver).groupdict())
     return device_hostname
 
-def software_ver_check(sh_ver):
 
+def software_ver_check(sh_ver):
     # Types of devices
     version_list = [
         "IOS XE",
@@ -58,7 +51,7 @@ def software_ver_check(sh_ver):
         "C2960X-UNIVERSALK9-M",
         "vios_l2-ADVENTERPRISEK9-M",
         "VIOS-ADVENTERPRISEK9-M",
-        "Junos"
+        "Junos",
     ]
     # Check software versions
     for version in version_list:
@@ -109,7 +102,6 @@ def save_output(device_hostname, commands_output):
 
 
 async def commands_output(ip_address):
-
     """
     Login and run list of commands from file on all devices on the site
 
@@ -127,18 +119,23 @@ async def commands_output(ip_address):
     device_params = GLOBAL_DEVICE_PARAMS.copy()
     device_params["host"] = ip_address
     parsed_values = dict()
-    
-    try: 
-        async with netdev.create(**device_params) as device_conn:
-            show_version_output = await device_conn.send_command("show version")
+
+    try:
+        # async with netdev.create(**device_params) as device_conn:
+        with ConnectHandler(**device_params) as device_conn:
+            show_version_output = device_conn.send_command("show version")
             parsed_values.update(extract_hostname(show_version_output))
             print("Running commands on {hostname}".format(**parsed_values))
 
             commands_list = get_commmands_list()
-            commands_output = ["Ping/Traceroute commands of {hostname}".format(**parsed_values)]
+            commands_output = [
+                "Ping/Traceroute commands of {hostname}".format(**parsed_values)
+            ]
             for show_command in commands_list:
-                commands_output.append("\n" + ("-" * 60) + "\n\n" + show_command + "\n\n")
-                commands_output.append(await device_conn.send_command(show_command))
+                commands_output.append(
+                    "\n" + ("-" * 60) + "\n\n" + show_command + "\n\n"
+                )
+                commands_output.append(device_conn.send_command(show_command))
             commands_output.append("\n" + ("=" * 80) + "\n")
             all_commands_output = "\n".join(commands_output)
 
@@ -152,26 +149,77 @@ async def commands_output(ip_address):
     # except netdev.exceptions.DisconnectError as e:
     except Exception as e:
         exception_msg = "Unable to login to device " + ip_address + "\n"
-        exception_msg+= str(e)
-        exception_msg+= "\n" + ("=" * 80) + "\n"
+        exception_msg += str(e)
+        exception_msg += "\n" + ("=" * 80) + "\n"
         result = {
-                "device_hostname": ip_address,
-                "commands_output": exception_msg,
-            }
+            "device_hostname": ip_address,
+            "commands_output": exception_msg,
+        }
         print("Unable to login to device " + ip_address)
-        print (e)
+        print(e)
         return result
 
 
-def main():
+# def main():
+#     start_time = time.time()
 
+#     ip_list = get_devices_list()
+
+#     loop = asyncio.get_event_loop()
+#     tasks = [loop.create_task(commands_output(ip)) for ip in ip_list]
+#     loop.run_until_complete(asyncio.gather(*tasks))
+
+#     for task in tasks:
+#         # print(dir(task))
+#         save_output(task.result()["device_hostname"], task.result()["commands_output"])
+
+#     print(f"It took {time.time() - start_time} seconds to run")
+
+
+# if __name__ == "__main__":
+#     main()
+
+
+# ------------------------------
+
+
+# async def main():
+#     start_time = time.time()
+
+#     ip_list = get_devices_list()
+
+#     tasks = [commands_output(ip) for ip in ip_list]
+#     await asyncio.gather(*tasks)
+
+#     for task in tasks:
+#         print(dir(task))
+#         # save_output(task.result()["device_hostname"], task.result()["commands_output"])
+
+#     print(f"It took {time.time() - start_time} seconds to run")
+
+
+# if __name__ == "__main__":
+#     asyncio.run(main())
+
+# ------------------------------
+
+
+async def main():
     start_time = time.time()
 
     ip_list = get_devices_list()
 
-    loop = asyncio.get_event_loop()
+    if sys.version_info < (3, 10):
+        loop = asyncio.get_event_loop()
+    else:
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
     tasks = [loop.create_task(commands_output(ip)) for ip in ip_list]
-    loop.run_until_complete(asyncio.gather(*tasks))
+    await asyncio.gather(*tasks)
 
     for task in tasks:
         save_output(task.result()["device_hostname"], task.result()["commands_output"])
@@ -180,4 +228,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
