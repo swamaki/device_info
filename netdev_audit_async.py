@@ -3,15 +3,16 @@
 import time
 import datetime
 from pytz import timezone
-from decouple import config
+import decouple
 import re
 import yaml
 import asyncio
-from netmiko import ConnectHandler
-import sys
+import netdev
 
-# from netmiko.ssh_exception import NetMikoTimeoutException
-# from netmiko.ssh_exception import AuthenticationException
+"""
+works as of 
+
+"""
 
 COMMANDS_FILE = "commands.yml"
 INVENTORY_FILE = "devices.yml"
@@ -19,18 +20,18 @@ INVENTORY_FILE = "devices.yml"
 # creds defined in ./.env file
 GLOBAL_DEVICE_PARAMS = {
     "device_type": "cisco_ios",
-    "username": config("USER_NAME"),
-    "password": config("PASSWORD"),
+    "username": decouple.config("USER_NAME"),
+    "password": decouple.config("PASSWORD"),
 }
 
 
-def get_devices_list(file_name=INVENTORY_FILE):
+def get_devices_list(file_name):
     with open(file_name) as f:
         result = yaml.safe_load(f)
     return result["devices"]
 
 
-def get_commmands_list(file_name=COMMANDS_FILE):
+def get_commmands_list(file_name):
     with open(file_name) as f:
         result = yaml.safe_load(f)
     return result["commands"]
@@ -121,13 +122,13 @@ async def commands_output(ip_address):
     parsed_values = dict()
 
     try:
-        # async with netdev.create(**device_params) as device_conn:
-        with ConnectHandler(**device_params) as device_conn:
-            show_version_output = device_conn.send_command("show version")
+        async with netdev.create(**device_params) as device_conn:
+            show_version_output = await device_conn.send_command("show version")
             parsed_values.update(extract_hostname(show_version_output))
+            # print(show_version_output)
             print("Running commands on {hostname}".format(**parsed_values))
 
-            commands_list = get_commmands_list()
+            commands_list = get_commmands_list(COMMANDS_FILE)
             commands_output = [
                 "Ping/Traceroute commands of {hostname}".format(**parsed_values)
             ]
@@ -135,7 +136,7 @@ async def commands_output(ip_address):
                 commands_output.append(
                     "\n" + ("-" * 60) + "\n\n" + show_command + "\n\n"
                 )
-                commands_output.append(device_conn.send_command(show_command))
+                commands_output.append(await device_conn.send_command(show_command))
             commands_output.append("\n" + ("=" * 80) + "\n")
             all_commands_output = "\n".join(commands_output)
 
@@ -160,66 +161,14 @@ async def commands_output(ip_address):
         return result
 
 
-# def main():
-#     start_time = time.time()
-
-#     ip_list = get_devices_list()
-
-#     loop = asyncio.get_event_loop()
-#     tasks = [loop.create_task(commands_output(ip)) for ip in ip_list]
-#     loop.run_until_complete(asyncio.gather(*tasks))
-
-#     for task in tasks:
-#         # print(dir(task))
-#         save_output(task.result()["device_hostname"], task.result()["commands_output"])
-
-#     print(f"It took {time.time() - start_time} seconds to run")
-
-
-# if __name__ == "__main__":
-#     main()
-
-
-# ------------------------------
-
-
-# async def main():
-#     start_time = time.time()
-
-#     ip_list = get_devices_list()
-
-#     tasks = [commands_output(ip) for ip in ip_list]
-#     await asyncio.gather(*tasks)
-
-#     for task in tasks:
-#         print(dir(task))
-#         # save_output(task.result()["device_hostname"], task.result()["commands_output"])
-
-#     print(f"It took {time.time() - start_time} seconds to run")
-
-
-# if __name__ == "__main__":
-#     asyncio.run(main())
-
-# ------------------------------
-
-
-async def main():
+def main():
     start_time = time.time()
 
-    ip_list = get_devices_list()
+    ip_list = get_devices_list(INVENTORY_FILE)
 
-    if sys.version_info < (3, 10):
-        loop = asyncio.get_event_loop()
-    else:
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
+    loop = asyncio.get_event_loop()
     tasks = [loop.create_task(commands_output(ip)) for ip in ip_list]
-    await asyncio.gather(*tasks)
+    loop.run_until_complete(asyncio.gather(*tasks))
 
     for task in tasks:
         save_output(task.result()["device_hostname"], task.result()["commands_output"])
@@ -228,4 +177,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

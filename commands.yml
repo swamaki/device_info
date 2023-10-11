@@ -5,10 +5,10 @@ commands:
   - term len 0
   - show run
   - show version
-  - show module
-  - show cdp neighbor | ex SEP
-  - show cdp neighbor detail
-  - show ip interface brief | exclude unass
+  # - show module
+  # - show cdp neighbor | ex SEP
+  # - show cdp neighbor detail
+  # - show ip interface brief | exclude unass
 # - show standby brief
 # - show interface status
 # - show interface status | include connected
