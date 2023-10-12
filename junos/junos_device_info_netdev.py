@@ -114,7 +114,7 @@ class DeviceInfo:
         """
         # creds defined in ./.env file
         GLOBAL_DEVICE_PARAMS = {
-            "device_type": "cisco_ios",
+            "device_type": "juniper_junos",
             "username": decouple.config("USER_NAME"),
             "password": decouple.config("PASSWORD"),
         }
@@ -164,8 +164,9 @@ class DeviceInfo:
 
 
 async def main():
-    COMMANDS_FILE = "commands.yml"
-    INVENTORY_FILE = "devices.yml"
+
+    COMMANDS_FILE = "junos_commands.yml"
+    INVENTORY_FILE = "junos_devices.yml"
 
     start_time = time.time()
 

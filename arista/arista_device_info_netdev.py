@@ -35,13 +35,16 @@ class DeviceInfo:
             result = yaml.safe_load(f)
         return result["commands"]
 
+    
     def extract_hostname(self, sh_ver):
         device_hostname = dict()
         for regexp in self.software_ver_check(sh_ver):
             device_hostname.update(regexp.search(sh_ver).groupdict())
         return device_hostname
 
+
     def software_ver_check(self, sh_ver):
+
         # Types of devices
         version_list = [
             "IOS XE",
@@ -50,6 +53,7 @@ class DeviceInfo:
             "vios_l2-ADVENTERPRISEK9-M",
             "VIOS-ADVENTERPRISEK9-M",
             "Junos",
+            "Arista vEOS"
         ]
         # Check software versions
         for version in version_list:
@@ -65,7 +69,8 @@ class DeviceInfo:
         elif version == "Junos":
             parsed_hostname = [re.compile(r"(^Hostname:\s+)(?P<hostname>\S+)", re.M)]
         else:  # other cisco ios versions
-            parsed_hostname = [re.compile(r"(?P<hostname>^\S+)\s+uptime", re.M)]
+            # parsed_hostname = [re.compile(r"(?P<hostname>^\S+)\s+uptime", re.M)] #ios
+            parsed_hostname = [re.compile(r"(^Hostname:\s+)(?P<hostname>\S+)", re.M)] #arista
 
         return parsed_hostname
 
@@ -98,6 +103,7 @@ class DeviceInfo:
         output_file.write(commands_output)
         output_file.close
 
+
     async def commands_output(self, ip_address):
         """
         Login and run list of commands from file on all devices on the site
@@ -114,7 +120,7 @@ class DeviceInfo:
         """
         # creds defined in ./.env file
         GLOBAL_DEVICE_PARAMS = {
-            "device_type": "cisco_ios",
+            "device_type": "arista_eos",
             "username": decouple.config("USER_NAME"),
             "password": decouple.config("PASSWORD"),
         }
@@ -125,7 +131,7 @@ class DeviceInfo:
 
         try:
             async with netdev.create(**device_params) as device_conn:
-                show_version_output = await device_conn.send_command("show version")
+                show_version_output = await device_conn.send_command("show hostname")
                 parsed_values.update(self.extract_hostname(show_version_output))
                 # print(show_version_output)
                 print("Running commands on {hostname}".format(**parsed_values))
@@ -164,8 +170,9 @@ class DeviceInfo:
 
 
 async def main():
-    COMMANDS_FILE = "commands.yml"
-    INVENTORY_FILE = "devices.yml"
+
+    COMMANDS_FILE = "arista_commands.yml"
+    INVENTORY_FILE = "arista_devices.yml"
 
     start_time = time.time()
 

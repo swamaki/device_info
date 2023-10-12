@@ -8,6 +8,7 @@ import re
 import yaml
 import asyncio
 import netdev
+from netmiko import ConnectHandler
 
 
 class DeviceInfo:
@@ -124,8 +125,8 @@ class DeviceInfo:
         parsed_values = dict()
 
         try:
-            async with netdev.create(**device_params) as device_conn:
-                show_version_output = await device_conn.send_command("show version")
+            with ConnectHandler(**device_params) as device_conn:
+                show_version_output = device_conn.send_command("show version")
                 parsed_values.update(self.extract_hostname(show_version_output))
                 # print(show_version_output)
                 print("Running commands on {hostname}".format(**parsed_values))
@@ -138,7 +139,7 @@ class DeviceInfo:
                     commands_output.append(
                         "\n" + ("-" * 60) + "\n\n" + show_command + "\n\n"
                     )
-                    commands_output.append(await device_conn.send_command(show_command))
+                    commands_output.append(device_conn.send_command(show_command))
                 commands_output.append("\n" + ("=" * 80) + "\n")
                 all_commands_output = "\n".join(commands_output)
 

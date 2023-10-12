@@ -1,1 +1,1 @@
-# Device Inventory
+# Device Info
