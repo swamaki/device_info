@@ -50,7 +50,7 @@ class DeviceInfo:
             "vios_l2-ADVENTERPRISEK9-M",
             "VIOS-ADVENTERPRISEK9-M",
             "Junos",
-            "Arista"
+            "Arista",
             "Cumulus",
         ]
         # Check software versions
@@ -144,6 +144,8 @@ class DeviceInfo:
                     # print(show_version_output)
                 elif self.platform_ver == "juniper_junos": 
                     show_version_output = await device_conn.send_command("show version")
+                elif self.platform_ver == "linux": 
+                    show_version_output = device_conn.send_command("nv show system")
                 else: 
                     print("Cannot determine hostname for this device")
 
@@ -220,6 +222,8 @@ class DeviceInfo:
                     # print(show_version_output)
                 elif self.platform_ver == "juniper_junos": 
                     show_version_output = device_conn.send_command("show version")
+                elif self.platform_ver == "linux": 
+                    show_version_output = device_conn.send_command("nv show system")
                 else: 
                     print("Cannot determine hostname for this device")
 

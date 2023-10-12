@@ -9,25 +9,37 @@ from device_info_lib import DeviceInfo
 async def main():
     start_time = time.time()
 
-    platform_ver = "cisco_ios"
+    # platform_ver = "cisco_ios"
     # platform_ver = "arista_eos"
-    # platform_ver = "juniper_junos"
+    platform_ver = "juniper_junos"
+    # platform_ver = "linux"
 
     if platform_ver == "arista_eos":
         commands_file = "commands_files/arista_commands.yml"
         inventory_file = "inventory_files/arista_devices.yml"
+        username = decouple.config("USER_NAME")
+        password = decouple.config("PASSWORD")
     elif platform_ver == "juniper_junos":
         commands_file = "commands_files/junos_commands.yml"
         inventory_file = "inventory_files/junos_devices.yml"
+        username = decouple.config("USER_NAME")
+        password = decouple.config("PASSWORD")
+    elif platform_ver == "linux":
+        commands_file = "commands_files/linux_commands.yml"
+        inventory_file = "inventory_files/linux_devices.yml"
+        username = decouple.config("LINUX_ADMIN")
+        password = decouple.config("PASSWORD")
     else:
         commands_file = "commands_files/cisco_commands.yml"
         inventory_file = "inventory_files/cisco_devices.yml"
+        username = decouple.config("USER_NAME")
+        password = decouple.config("PASSWORD")
 
-    # creds defined in ./.env file
+    # creds defined in ./.env file and retrieved via decouple
     global_device_params = {
         "device_type": platform_ver,
-        "username": decouple.config("USER_NAME"),
-        "password": decouple.config("PASSWORD"),
+        "username": username,
+        "password": password,
     }
 
 
