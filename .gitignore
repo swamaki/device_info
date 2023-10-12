@@ -1,0 +1,7 @@
+
+.env
+.DS_Store
+scratch.py
+__pycache__/
+output_notes.txt
+show_version_output.txt
