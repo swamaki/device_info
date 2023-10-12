@@ -6,6 +6,53 @@ import re
 import yaml
 import netdev
 from netmiko import ConnectHandler
+import decouple
+
+class SetConnectionParams:
+    def __init__(self, device_type: str): 
+        self.device_type = device_type
+
+    def set_params(self): 
+        """
+        Set parameters for the command_file, inventory_file
+        Retrieve username/password from .env file 
+
+        Return these as a dictionary and use the keys to retrieve values. 
+
+        """
+        if self.device_type == "arista_eos":
+            commands_file = "commands_files/arista_commands.yml"
+            inventory_file = "inventory_files/arista_devices.yml"
+            username = decouple.config("USER_NAME")
+            password = decouple.config("PASSWORD")
+        elif self.device_type == "juniper_junos":
+            commands_file = "commands_files/junos_commands.yml"
+            inventory_file = "inventory_files/junos_devices.yml"
+            username = decouple.config("USER_NAME")
+            password = decouple.config("PASSWORD")
+        elif self.device_type == "linux":
+            commands_file = "commands_files/linux_commands.yml"
+            inventory_file = "inventory_files/linux_devices.yml"
+            username = decouple.config("LINUX_ADMIN")
+            password = decouple.config("PASSWORD")
+        else:
+            commands_file = "commands_files/cisco_commands.yml"
+            inventory_file = "inventory_files/cisco_devices.yml"
+            username = decouple.config("USER_NAME")
+            password = decouple.config("PASSWORD")
+
+        global_device_params = {
+            "device_type": self.device_type,
+            "username": username,
+            "password": password,
+        }
+        device_params = {
+            "inventory_file": inventory_file,
+            "commands_file": commands_file,
+            "global_device_params": global_device_params
+        }
+        return device_params
+
 
 class DeviceInfo:
     """
@@ -18,12 +65,12 @@ class DeviceInfo:
 
     """
 
-    def __init__(self, inventory_file, commands_file, platform_ver, global_device_params):
+    def __init__(self, inventory_file: str, commands_file: str, global_device_params: str):
         self.inventory_file = inventory_file
         self.commands_file = commands_file
-        self.platform_ver = platform_ver
+        self.device_type = global_device_params["device_type"]
         self.global_device_params = global_device_params
-
+    
     def get_devices_list(self):
         with open(self.inventory_file) as f:
             result = yaml.safe_load(f)
@@ -128,9 +175,9 @@ class DeviceInfo:
 
         try:
             async with netdev.create(**device_params) as device_conn:
-                if self.platform_ver == "cisco_ios": 
+                if self.device_type == "cisco_ios": 
                     show_version_output = await device_conn.send_command("show version")
-                elif self.platform_ver == "arista_eos": 
+                elif self.device_type == "arista_eos": 
                     show_ver_commands = ["show hostname", "show version"]
                     show_version_output = ""
                     for command in show_ver_commands: 
@@ -142,9 +189,9 @@ class DeviceInfo:
                     # show_version_output = await device_conn.send_command("show hostname")
                     # show_version_output+= await device_conn.send_command("show ver")
                     # print(show_version_output)
-                elif self.platform_ver == "juniper_junos": 
+                elif self.device_type == "juniper_junos": 
                     show_version_output = await device_conn.send_command("show version")
-                elif self.platform_ver == "linux": 
+                elif self.device_type == "linux": 
                     show_version_output = device_conn.send_command("nv show system")
                 else: 
                     print("Cannot determine hostname for this device")
@@ -206,9 +253,9 @@ class DeviceInfo:
 
         try:
             with ConnectHandler(**device_params) as device_conn:
-                if self.platform_ver == "cisco_ios": 
+                if self.device_type == "cisco_ios": 
                     show_version_output = device_conn.send_command("show version")
-                elif self.platform_ver == "arista_eos": 
+                elif self.device_type == "arista_eos": 
                     show_ver_commands = ["show hostname", "show version"]
                     show_version_output = ""
                     for command in show_ver_commands: 
@@ -220,9 +267,9 @@ class DeviceInfo:
                     # show_version_output = await device_conn.send_command("show hostname")
                     # show_version_output+= await device_conn.send_command("show ver")
                     # print(show_version_output)
-                elif self.platform_ver == "juniper_junos": 
+                elif self.device_type == "juniper_junos": 
                     show_version_output = device_conn.send_command("show version")
-                elif self.platform_ver == "linux": 
+                elif self.device_type == "linux": 
                     show_version_output = device_conn.send_command("nv show system")
                 else: 
                     print("Cannot determine hostname for this device")
