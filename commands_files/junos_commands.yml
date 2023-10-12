@@ -1,9 +1,9 @@
 commands:
-- show configuration | display set | no-more 
-- show configuration | no-more 
-# - term len 0
-# - show run
-# - show version
+  - show configuration | display set | no-more
+  - show configuration | no-more
+  # - term len 0
+  # - show run
+  - show version
 # - show module
 # - show cdp neighbor | ex SEP
 # - show cdp neighbor detail
@@ -43,28 +43,28 @@ commands:
 
 #==============================
 
-# - show configuration | display set | no-more 
+# - show configuration | display set | no-more
 # - show  version
-# - show chassis hardware 
+# - show chassis hardware
 # - show chassis environment
 # - show system uptime
 # - show chassis alarms
 # - show system alarms
 # - show lacp interfaces
 # - show lldp neighbors
-# - show interfaces terse 
+# - show interfaces terse
 # - show interfaces extensive
 # - show interfaces descriptions
 # - show vrrp
 # - show vrrp brief
 # - show route
-# - show route protocol ospf 
+# - show route protocol ospf
 # - show route protocol bgp
-# - show ospf neighbor 
+# - show ospf neighbor
 # - show ospf interface brief
 # - show ospf database
 # - show bgp neighbor
 # - show bgp summary
 # - show pim neighbor
 # - show pim rps
-# - show route protocol pim 
+# - show route protocol pim

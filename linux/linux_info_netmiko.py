@@ -8,6 +8,7 @@ import re
 import yaml
 import asyncio
 import netdev
+from netmiko import ConnectHandler
 
 
 class DeviceInfo:
@@ -35,16 +36,13 @@ class DeviceInfo:
             result = yaml.safe_load(f)
         return result["commands"]
 
-    
     def extract_hostname(self, sh_ver):
         device_hostname = dict()
         for regexp in self.software_ver_check(sh_ver):
             device_hostname.update(regexp.search(sh_ver).groupdict())
         return device_hostname
 
-
     def software_ver_check(self, sh_ver):
-
         # Types of devices
         version_list = [
             "IOS XE",
@@ -53,7 +51,7 @@ class DeviceInfo:
             "vios_l2-ADVENTERPRISEK9-M",
             "VIOS-ADVENTERPRISEK9-M",
             "Junos",
-            "Arista vEOS"
+            "Cumulus"
         ]
         # Check software versions
         for version in version_list:
@@ -68,9 +66,10 @@ class DeviceInfo:
             ]
         elif version == "Junos":
             parsed_hostname = [re.compile(r"(^Hostname:\s+)(?P<hostname>\S+)", re.M)]
+        elif version == "Cumulus":
+            parsed_hostname = [re.compile(r"(^hostname\s+)(?P<hostname>\S+)", re.M)]
         else:  # other cisco ios versions
-            # parsed_hostname = [re.compile(r"(?P<hostname>^\S+)\s+uptime", re.M)] #ios
-            parsed_hostname = [re.compile(r"(^Hostname:\s+)(?P<hostname>\S+)", re.M)] #arista
+            parsed_hostname = [re.compile(r"(?P<hostname>^\S+)\s+uptime", re.M)]
 
         return parsed_hostname
 
@@ -103,7 +102,6 @@ class DeviceInfo:
         output_file.write(commands_output)
         output_file.close
 
-
     async def commands_output(self, ip_address):
         """
         Login and run list of commands from file on all devices on the site
@@ -120,8 +118,8 @@ class DeviceInfo:
         """
         # creds defined in ./.env file
         GLOBAL_DEVICE_PARAMS = {
-            "device_type": "arista_eos",
-            "username": decouple.config("USER_NAME"),
+            "device_type": "linux",
+            "username": decouple.config("LINUX_ADMIN"),
             "password": decouple.config("PASSWORD"),
         }
 
@@ -130,8 +128,8 @@ class DeviceInfo:
         parsed_values = dict()
 
         try:
-            async with netdev.create(**device_params) as device_conn:
-                show_version_output = await device_conn.send_command("show hostname")
+            with ConnectHandler(**device_params) as device_conn:
+                show_version_output = device_conn.send_command("nv show system")
                 parsed_values.update(self.extract_hostname(show_version_output))
                 # print(show_version_output)
                 print("Running commands on {hostname}".format(**parsed_values))
@@ -144,7 +142,7 @@ class DeviceInfo:
                     commands_output.append(
                         "\n" + ("-" * 60) + "\n\n" + show_command + "\n\n"
                     )
-                    commands_output.append(await device_conn.send_command(show_command))
+                    commands_output.append(device_conn.send_command(show_command))
                 commands_output.append("\n" + ("=" * 80) + "\n")
                 all_commands_output = "\n".join(commands_output)
 
@@ -170,9 +168,8 @@ class DeviceInfo:
 
 
 async def main():
-
-    COMMANDS_FILE = "arista_commands.yml"
-    INVENTORY_FILE = "arista_devices.yml"
+    COMMANDS_FILE = "linux_commands.yml"
+    INVENTORY_FILE = "linux_devices.yml"
 
     start_time = time.time()
 
