@@ -309,5 +309,3 @@ class DeviceInfo:
             print("Unable to login to device " + ip_address)
             print(e)
             return result
-
-
