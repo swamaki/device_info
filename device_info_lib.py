@@ -8,16 +8,17 @@ import netdev
 from netmiko import ConnectHandler
 import decouple
 
+
 class SetConnectionParams:
-    def __init__(self, device_type: str): 
+    def __init__(self, device_type: str):
         self.device_type = device_type
 
-    def set_params(self): 
+    def set_params(self):
         """
         Set parameters for the command_file, inventory_file
-        Retrieve username/password from .env file 
+        Retrieve username/password from .env file
 
-        Return these as a dictionary and use the keys to retrieve values. 
+        Return these as a dictionary and use the keys to retrieve values.
 
         """
         if self.device_type == "arista_eos":
@@ -49,7 +50,7 @@ class SetConnectionParams:
         device_params = {
             "inventory_file": inventory_file,
             "commands_file": commands_file,
-            "global_device_params": global_device_params
+            "global_device_params": global_device_params,
         }
         return device_params
 
@@ -65,12 +66,14 @@ class DeviceInfo:
 
     """
 
-    def __init__(self, inventory_file: str, commands_file: str, global_device_params: str):
+    def __init__(
+        self, inventory_file: str, commands_file: str, global_device_params: str
+    ):
         self.inventory_file = inventory_file
         self.commands_file = commands_file
         self.device_type = global_device_params["device_type"]
         self.global_device_params = global_device_params
-    
+
     def get_devices_list(self):
         with open(self.inventory_file) as f:
             result = yaml.safe_load(f)
@@ -120,7 +123,9 @@ class DeviceInfo:
         elif version == "Cumulus":
             parsed_hostname = [re.compile(r"(^hostname\s+)(?P<hostname>\S+)", re.M)]
         else:  # other platform versions
-            parsed_hostname = [re.compile(r"(^Hostname:\s+)(?P<hostname>\S+)", re.M)] #arista vEOS
+            parsed_hostname = [
+                re.compile(r"(^Hostname:\s+)(?P<hostname>\S+)", re.M)
+            ]  # arista vEOS
             # print("Cannot determine the platform version for this device")
 
         return parsed_hostname
@@ -140,7 +145,7 @@ class DeviceInfo:
 
         est = timezone("EST")
         time_now = datetime.datetime.now(est)
-        output_filename = "%s_%.2i%.2i%i_%.2i%.2i%.2i.log" % (
+        output_filename = "./device_outputs/%s_%.2i%.2i%i_%.2i%.2i%.2i.log" % (
             device_hostname,
             time_now.year,
             time_now.month,
@@ -151,6 +156,7 @@ class DeviceInfo:
         )
         # output_filename = "%s.txt" % (device_hostname) #filenames without timestamps
         output_file = open(output_filename, "a")
+        # output_file = open(output_filename, "a")
         output_file.write(commands_output)
         output_file.close
 
@@ -168,32 +174,32 @@ class DeviceInfo:
         the method used to parse the device hostname could be simpler but it's flexible enough to add other parsed variables.
 
         """
-        
+
         device_params = self.global_device_params.copy()
         device_params["host"] = ip_address
         parsed_values = dict()
 
         try:
             async with netdev.create(**device_params) as device_conn:
-                if self.device_type == "cisco_ios": 
+                if self.device_type == "cisco_ios":
                     show_version_output = await device_conn.send_command("show version")
-                elif self.device_type == "arista_eos": 
+                elif self.device_type == "arista_eos":
                     show_ver_commands = ["show hostname", "show version"]
                     show_version_output = ""
-                    for command in show_ver_commands: 
-                        show_version_output+= await device_conn.send_command(command)
+                    for command in show_ver_commands:
+                        show_version_output += await device_conn.send_command(command)
                     """ TODO: Need to determine hostname extraction for Arista vEOS with a single 
                         command or send multiple commands at once. 
                     """
-                    
+
                     # show_version_output = await device_conn.send_command("show hostname")
                     # show_version_output+= await device_conn.send_command("show ver")
                     # print(show_version_output)
-                elif self.device_type == "juniper_junos": 
+                elif self.device_type == "juniper_junos":
                     show_version_output = await device_conn.send_command("show version")
-                elif self.device_type == "linux": 
+                elif self.device_type == "linux":
                     show_version_output = device_conn.send_command("nv show system")
-                else: 
+                else:
                     print("Cannot determine hostname for this device")
 
                 parsed_values.update(self.extract_hostname(show_version_output))
@@ -231,7 +237,7 @@ class DeviceInfo:
             print("Unable to login to device " + ip_address)
             print(e)
             return result
-        
+
     async def commands_output_netmiko(self, ip_address):
         """
         Login and run list of commands from file on all devices on the site
@@ -246,32 +252,32 @@ class DeviceInfo:
         the method used to parse the device hostname could be simpler but it's flexible enough to add other parsed variables.
 
         """
-        
+
         device_params = self.global_device_params.copy()
         device_params["host"] = ip_address
         parsed_values = dict()
 
         try:
             with ConnectHandler(**device_params) as device_conn:
-                if self.device_type == "cisco_ios": 
+                if self.device_type == "cisco_ios":
                     show_version_output = device_conn.send_command("show version")
-                elif self.device_type == "arista_eos": 
+                elif self.device_type == "arista_eos":
                     show_ver_commands = ["show hostname", "show version"]
                     show_version_output = ""
-                    for command in show_ver_commands: 
-                        show_version_output+= device_conn.send_command(command)
+                    for command in show_ver_commands:
+                        show_version_output += device_conn.send_command(command)
                     """ TODO: Need to determine hostname extraction for Arista vEOS with a single 
                         command or send multiple commands at once. 
                     """
-                    
+
                     # show_version_output = await device_conn.send_command("show hostname")
                     # show_version_output+= await device_conn.send_command("show ver")
                     # print(show_version_output)
-                elif self.device_type == "juniper_junos": 
+                elif self.device_type == "juniper_junos":
                     show_version_output = device_conn.send_command("show version")
-                elif self.device_type == "linux": 
+                elif self.device_type == "linux":
                     show_version_output = device_conn.send_command("nv show system")
-                else: 
+                else:
                     print("Cannot determine hostname for this device")
 
                 parsed_values.update(self.extract_hostname(show_version_output))
@@ -301,6 +307,68 @@ class DeviceInfo:
         except Exception as e:
             exception_msg = "Unable to login to device " + ip_address + "\n"
             exception_msg += str(e)
+            exception_msg += "\n" + ("=" * 80) + "\n"
+            result = {
+                "device_hostname": ip_address,
+                "commands_output": exception_msg,
+            }
+            print("Unable to login to device " + ip_address)
+            print(e)
+            return result
+
+    async def configure_from_file(self, ip_address):
+        """
+        Login and run list of commands from file on all devices on the site
+
+        Args:
+            ip_address (list): host ip address from list component
+
+        Returns:
+            hostname (dict): key is device hostname, value is dictionary containing hostname for use in saving output to file
+            command output(dict): concantenated string of the outputs executed on devices
+
+        the method used to parse the device hostname could be simpler but it's flexible enough to add other parsed variables.
+
+        check pydoc netmiko and /send_config
+
+        """
+
+        device_params = self.global_device_params.copy()
+        device_params["host"] = ip_address
+        parsed_values = dict()
+
+        try:
+            async with netdev.create(**device_params) as device_conn:
+                parsed_values.update(
+                    self.extract_hostname(
+                        await device_conn.send_command("show version")
+                    )
+                )
+                print("Deploying configs on {hostname}".format(**parsed_values))
+
+                commands_output = [
+                    "Configs deployed to {hostname}".format(**parsed_values)
+                ]
+
+                config_file = (
+                    "./config_files/{hostname}.conf".format(**parsed_values)
+                ).lower()
+
+                commands_output.append(
+                    await device_conn.send_config_from_file(config_file)
+                )
+                commands_output.append("\n" + ("=" * 80) + "\n")
+                all_commands_output = "\n".join(commands_output)
+
+                result = {
+                    "device_hostname": "{hostname}".format(**parsed_values),
+                    "commands_output": all_commands_output,
+                }
+                return result
+
+        # except netdev.exceptions.DisconnectError as e:
+        except Exception as e:
+            exception_msg = "Unable to login to device " + ip_address + "\n"
             exception_msg += "\n" + ("=" * 80) + "\n"
             result = {
                 "device_hostname": ip_address,

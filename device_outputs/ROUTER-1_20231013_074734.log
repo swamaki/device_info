@@ -1,0 +1,11 @@
+Configs deployed to ROUTER-1
+conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+ROUTER-1(config)#
+ROUTER-1(config)#!
+ROUTER-1(config)#snmp-server community SNMP_3 RO ACL_3
+ROUTER-1(config)#!
+ROUTER-1(config)#end
+ROUTER-1#
+
+================================================================================
