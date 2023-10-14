@@ -1,6 +1,5 @@
 .DS_Store
 .env
-.git
 __pycache__/
 device_info/1_output_notes.txt
 device_info/1_show_version_output.txt
