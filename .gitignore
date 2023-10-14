@@ -2,6 +2,7 @@
 .env
 .git
 __pycache__/
-1_output_notes.txt
-1_show_version_output.txt
+device_info/1_output_notes.txt
+device_info/1_show_version_output.txt
+device_info/device_outputs/
 

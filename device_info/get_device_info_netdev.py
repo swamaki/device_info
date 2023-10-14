@@ -2,11 +2,13 @@
 
 import time
 import asyncio
+
 from device_info_lib import DeviceInfo, SetConnectionParams
+
+# from myscripts.device_info.device_info_lib import DeviceInfo, SetConnectionParams
 
 
 async def main():
-
     start_time = time.time()
 
     # device_type = "cisco_ios"
@@ -23,9 +25,8 @@ async def main():
     device_info = DeviceInfo(inventory_file, commands_file, global_device_params)
     ip_list = device_info.get_devices_list()
 
-    tasks = [asyncio.create_task(device_info.commands_output_netmiko(ip)) for ip in ip_list]
+    tasks = [asyncio.create_task(device_info.commands_output(ip)) for ip in ip_list]
     results = await asyncio.gather(*tasks)
-
 
     for result in results:
         device_info.save_output(result["device_hostname"], result["commands_output"])
