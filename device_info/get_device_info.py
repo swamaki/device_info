@@ -15,8 +15,8 @@ async def main():
 
     # device_type = "cisco_ios"
     # device_type = "arista_eos"
-    device_type = "juniper_junos"
-    # device_type = "linux"
+    # device_type = "juniper_junos"
+    device_type = "linux"
 
     connection_params = SetConnectionParams(device_type)
     device_params = connection_params.set_params()

@@ -9,6 +9,21 @@ from netmiko import ConnectHandler
 import decouple
 
 
+class SSHErrors(Exception):
+    # except netdev.exceptions.DisconnectError as e:
+    except Exception as e:
+        exception_msg = "Unable to login to device " + ip_address + "\n"
+        exception_msg += str(e)
+        exception_msg += "\n" + ("=" * 80) + "\n"
+        result = {
+            "device_hostname": ip_address,
+            "commands_output": exception_msg,
+        }
+        print("Unable to login to device " + ip_address)
+        print(e)
+        return result
+
+
 class SetConnectionParams:
     def __init__(self, device_type: str):
         self.device_type = device_type
@@ -84,53 +99,26 @@ class DeviceInfo:
             result = yaml.safe_load(f)
         return result["commands"]
 
-    def extract_hostname(self, sh_ver):
+    def extract_hostname(self, hostname_filter: str):
         device_hostname = dict()
-        for regexp in self.software_ver_check(sh_ver):
-            device_hostname.update(regexp.search(sh_ver).groupdict())
+        if (
+            self.device_type == "cisco_ios"
+            or self.device_type == "cisco_nxos"
+            or self.device_type == "arista_eos"
+        ):
+            hostname_regexp = [re.compile(r"(hostname\s+)(?P<hostname>\S+)", re.M)]
+        elif self.device_type == "juniper_junos":
+            hostname_regexp = [re.compile(r"(host-name\s+)(?P<hostname>\S+)", re.M)]
+        elif self.device_type == "linux":
+            hostname_regexp = [re.compile(r"(?P<hostname>\S+)", re.M)]
+        else:  # other platform versions
+            hostname_regexp = [re.compile(r"(hostname\s+)(?P<hostname>\S+)", re.M)]
+
+        for regexp in hostname_regexp:
+            device_hostname.update(regexp.search(hostname_filter).groupdict())
         return device_hostname
 
-    def software_ver_check(self, sh_ver):
-        # Types of devices
-        version_list = [
-            "IOS XE",
-            "NX-OS",
-            "Cisco IOSv",
-            "C2960X-UNIVERSALK9-M",
-            "vios_l2-ADVENTERPRISEK9-M",
-            "VIOS-ADVENTERPRISEK9-M",
-            "Junos",
-            "Arista",
-            "Cumulus",
-        ]
-        # Check software versions
-        for version in version_list:
-            int_version = 0  # Reset integer value
-            int_version = sh_ver.find(version)  # Check software version
-            if int_version > 0:  # software version found, break out of loop.
-                break
-
-        if version == "NX-OS":
-            parsed_hostname = [
-                re.compile(r"(^\s+)+(Device name:)\s(?P<hostname>\S+)", re.M)
-            ]
-        elif version == "Cisco IOSv":
-            parsed_hostname = [re.compile(r"(?P<hostname>^\S+)\s+uptime", re.M)]
-        elif version == "Junos":
-            parsed_hostname = [re.compile(r"(^Hostname:\s+)(?P<hostname>\S+)", re.M)]
-        elif version == "Arista":
-            parsed_hostname = [re.compile(r"(^Hostname:\s+)(?P<hostname>\S+)", re.M)]
-        elif version == "Cumulus":
-            parsed_hostname = [re.compile(r"(^hostname\s+)(?P<hostname>\S+)", re.M)]
-        else:  # other platform versions
-            parsed_hostname = [
-                re.compile(r"(^Hostname:\s+)(?P<hostname>\S+)", re.M)
-            ]  # arista vEOS
-            # print("Cannot determine the platform version for this device")
-
-        return parsed_hostname
-
-    def save_output(self, device_hostname, commands_output):
+    def save_output(self, device_hostname: str, commands_output: str):
         """
         writes outputs to a file.
 
@@ -145,7 +133,7 @@ class DeviceInfo:
 
         est = timezone("EST")
         time_now = datetime.datetime.now(est)
-        output_filename = "./device_outputs/%s_%.2i%.2i%i_%.2i%.2i%.2i.log" % (
+        output_filename = "./outputs/%s_%.2i%.2i%i_%.2i%.2i%.2i.log" % (
             device_hostname,
             time_now.year,
             time_now.month,
@@ -156,7 +144,6 @@ class DeviceInfo:
         )
         # output_filename = "%s.txt" % (device_hostname) #filenames without timestamps
         output_file = open(output_filename, "a")
-        # output_file = open(output_filename, "a")
         output_file.write(commands_output)
         output_file.close
 
@@ -181,29 +168,24 @@ class DeviceInfo:
 
         try:
             async with netdev.create(**device_params) as device_conn:
-                if self.device_type == "cisco_ios":
-                    show_version_output = await device_conn.send_command("show version")
-                elif self.device_type == "arista_eos":
-                    show_ver_commands = ["show hostname", "show version"]
-                    show_version_output = ""
-                    for command in show_ver_commands:
-                        show_version_output += await device_conn.send_command(command)
-                    """ TODO: Need to determine hostname extraction for Arista vEOS with a single 
-                        command or send multiple commands at once. 
-                    """
-
-                    # show_version_output = await device_conn.send_command("show hostname")
-                    # show_version_output+= await device_conn.send_command("show ver")
-                    # print(show_version_output)
+                if (
+                    self.device_type == "cisco_ios"
+                    or self.device_type == "cisco_nxos"
+                    or self.device_type == "arista_eos"
+                ):
+                    hostname_filter = await device_conn.send_command(
+                        "show run | include hostname"
+                    )
                 elif self.device_type == "juniper_junos":
-                    show_version_output = await device_conn.send_command("show version")
+                    hostname_filter = await device_conn.send_command(
+                        "show configuration | display set | match host-name"
+                    )
                 elif self.device_type == "linux":
-                    show_version_output = device_conn.send_command("nv show system")
+                    hostname_filter = device_conn.send_command("hostname")
                 else:
                     print("Cannot determine hostname for this device")
 
-                parsed_values.update(self.extract_hostname(show_version_output))
-                # print(show_version_output)
+                parsed_values.update(self.extract_hostname(hostname_filter))
                 print("Running commands on {hostname}".format(**parsed_values))
 
                 commands_list = self.get_commmands_list()
@@ -259,29 +241,24 @@ class DeviceInfo:
 
         try:
             with ConnectHandler(**device_params) as device_conn:
-                if self.device_type == "cisco_ios":
-                    show_version_output = device_conn.send_command("show version")
-                elif self.device_type == "arista_eos":
-                    show_ver_commands = ["show hostname", "show version"]
-                    show_version_output = ""
-                    for command in show_ver_commands:
-                        show_version_output += device_conn.send_command(command)
-                    """ TODO: Need to determine hostname extraction for Arista vEOS with a single 
-                        command or send multiple commands at once. 
-                    """
-
-                    # show_version_output = await device_conn.send_command("show hostname")
-                    # show_version_output+= await device_conn.send_command("show ver")
-                    # print(show_version_output)
+                if (
+                    self.device_type == "cisco_ios"
+                    or self.device_type == "cisco_nxos"
+                    or self.device_type == "arista_eos"
+                ):
+                    hostname_filter = await device_conn.send_command(
+                        "show run | include hostname"
+                    )
                 elif self.device_type == "juniper_junos":
-                    show_version_output = device_conn.send_command("show version")
+                    hostname_filter = await device_conn.send_command(
+                        "show configuration | display set | match host-name"
+                    )
                 elif self.device_type == "linux":
-                    show_version_output = device_conn.send_command("nv show system")
+                    hostname_filter = device_conn.send_command("hostname")
                 else:
                     print("Cannot determine hostname for this device")
 
-                parsed_values.update(self.extract_hostname(show_version_output))
-                # print(show_version_output)
+                parsed_values.update(self.extract_hostname(hostname_filter))
                 print("Running commands on {hostname}".format(**parsed_values))
 
                 commands_list = self.get_commmands_list()
@@ -339,11 +316,25 @@ class DeviceInfo:
 
         try:
             async with netdev.create(**device_params) as device_conn:
-                parsed_values.update(
-                    self.extract_hostname(
-                        await device_conn.send_command("show version")
+                if (
+                    self.device_type == "cisco_ios"
+                    or self.device_type == "cisco_nxos"
+                    or self.device_type == "arista_eos"
+                ):
+                    hostname_filter = await device_conn.send_command(
+                        "show run | include hostname"
                     )
-                )
+                elif self.device_type == "juniper_junos":
+                    hostname_filter = await device_conn.send_command(
+                        "show configuration | display set | match host-name"
+                    )
+                elif self.device_type == "linux":
+                    hostname_filter = device_conn.send_command("hostname")
+                else:
+                    print("Cannot determine hostname for this device")
+
+                parsed_values.update(self.extract_hostname(hostname_filter))
+
                 print("Deploying configs on {hostname}".format(**parsed_values))
 
                 commands_output = [

@@ -23,7 +23,6 @@ async def main():
 
     device_info = DeviceInfo(inventory_file, commands_file, global_device_params)
     ip_list = device_info.get_devices_list()
-    print(ip_list)
 
     tasks = [asyncio.create_task(device_info.configure_from_file(ip)) for ip in ip_list]
     results = await asyncio.gather(*tasks)
