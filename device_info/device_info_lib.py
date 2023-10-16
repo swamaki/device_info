@@ -90,8 +90,8 @@ class SetConnectionParams:
         }
         return device_params
 
-    def load_yaml_file(self, devices_file):
-        with open(devices_file) as f:
+    def load_yaml_file(self, file_name):
+        with open(file_name) as f:
             result = yaml.safe_load(f)
         return result
 
