@@ -10,17 +10,22 @@ import decouple
 
 
 class SSHErrors(Exception):
+    # pass
     # except netdev.exceptions.DisconnectError as e:
-    except Exception as e:
+    # except Exception as e:
+    def __init__(self, ip_address, exception_e):
+        self.ip_address = ip_address
+        self.exception_e = exception_e
+
         exception_msg = "Unable to login to device " + ip_address + "\n"
-        exception_msg += str(e)
+        exception_msg += str(exception_e)
         exception_msg += "\n" + ("=" * 80) + "\n"
         result = {
             "device_hostname": ip_address,
             "commands_output": exception_msg,
         }
         print("Unable to login to device " + ip_address)
-        print(e)
+        print(exception_e)
         return result
 
 
@@ -30,30 +35,46 @@ class SetConnectionParams:
 
     def set_params(self):
         """
-        Set parameters for the command_file, inventory_file
-        Retrieve username/password from .env file
+        Set parameters for the commands_files, devices_files and
+        retrieve username/password from .env file via python-decouple
 
         Return these as a dictionary and use the keys to retrieve values.
+
+        Setup connection parameters with examples below:
+
+        device_type = "linux"
+        connection_params = SetConnectionParams(device_type)
+        device_params = connection_params.set_params()
+
+        devices_file = device_params["devices_file"]
+        ip_list = connection_params.open_yaml_file(devices_file)["devices"]
+
+        commands_file = device_params["commands_file"]
+        commands_list = connection_params.open_yaml_file(commands_file)["commands"]
+
+        global_device_params = device_params["global_device_params"]
+
+        device_info = DeviceInfo(commands_list, global_device_params)
 
         """
         if self.device_type == "arista_eos":
             commands_file = "commands_files/arista_commands.yml"
-            inventory_file = "inventory_files/arista_devices.yml"
+            devices_file = "devices_files/arista_devices.yml"
             username = decouple.config("USER_NAME")
             password = decouple.config("PASSWORD")
         elif self.device_type == "juniper_junos":
             commands_file = "commands_files/junos_commands.yml"
-            inventory_file = "inventory_files/junos_devices.yml"
+            devices_file = "devices_files/junos_devices.yml"
             username = decouple.config("USER_NAME")
             password = decouple.config("PASSWORD")
         elif self.device_type == "linux":
             commands_file = "commands_files/linux_commands.yml"
-            inventory_file = "inventory_files/linux_devices.yml"
+            devices_file = "devices_files/linux_devices.yml"
             username = decouple.config("LINUX_ADMIN")
             password = decouple.config("PASSWORD")
         else:
             commands_file = "commands_files/cisco_commands.yml"
-            inventory_file = "inventory_files/cisco_devices.yml"
+            devices_file = "devices_files/cisco_devices.yml"
             username = decouple.config("USER_NAME")
             password = decouple.config("PASSWORD")
 
@@ -63,43 +84,45 @@ class SetConnectionParams:
             "password": password,
         }
         device_params = {
-            "inventory_file": inventory_file,
+            "devices_file": devices_file,
             "commands_file": commands_file,
             "global_device_params": global_device_params,
         }
         return device_params
+
+    def open_yaml_file(self, devices_file):
+        with open(devices_file) as f:
+            result = yaml.safe_load(f)
+        return result
 
 
 class DeviceInfo:
     """
     Create the object int the form of:
 
-    device_info = DeviceInfo(inventory_file, commands_file)
+    device_info = DeviceInfo(commands_list, global_device_params)
 
-    Access methods eg:
-    ip_list = device_info.get_devices_list()
+    Send a list of commands and a dict of global connection params.
+    These global device params are sent with the "device_type", "username", "password" set
+
+    the "commands_output" method adds the ip_address to teh params and prep this for connection.
+
+    extract device_type from the global device params to use for device_type comparisions for
+    hostname extraction and what command to run for hostname extraction
+
+    Extract commands list to use for iteration in commands output method
+
+    re-assign global device params so that it can be copied and reused for the different
+    commands output methods.
 
     """
 
-    def __init__(
-        self, inventory_file: str, commands_file: str, global_device_params: str
-    ):
-        self.inventory_file = inventory_file
-        self.commands_file = commands_file
-        self.device_type = global_device_params["device_type"]
+    def __init__(self, commands_list: list[str], global_device_params: dict[str, str]):
+        self.commands_list = commands_list
         self.global_device_params = global_device_params
+        self.device_type: str = global_device_params["device_type"]
 
-    def get_devices_list(self):
-        with open(self.inventory_file) as f:
-            result = yaml.safe_load(f)
-        return result["devices"]
-
-    def get_commmands_list(self):
-        with open(self.commands_file) as f:
-            result = yaml.safe_load(f)
-        return result["commands"]
-
-    def extract_hostname(self, hostname_filter: str):
+    def extract_hostname(self, hostname_filter: str) -> dict[str, str]:
         device_hostname = dict()
         if (
             self.device_type == "cisco_ios"
@@ -118,7 +141,7 @@ class DeviceInfo:
             device_hostname.update(regexp.search(hostname_filter).groupdict())
         return device_hostname
 
-    def save_output(self, device_hostname: str, commands_output: str):
+    def save_output(self, device_hostname: str, commands_output: str) -> None:
         """
         writes outputs to a file.
 
@@ -147,7 +170,7 @@ class DeviceInfo:
         output_file.write(commands_output)
         output_file.close
 
-    async def commands_output(self, ip_address):
+    async def commands_output(self, ip_address: str) -> dict[str, str]:
         """
         Login and run list of commands from file on all devices on the site
 
@@ -181,18 +204,17 @@ class DeviceInfo:
                         "show configuration | display set | match host-name"
                     )
                 elif self.device_type == "linux":
-                    hostname_filter = device_conn.send_command("hostname")
+                    hostname_filter = await device_conn.send_command("hostname")
                 else:
                     print("Cannot determine hostname for this device")
 
                 parsed_values.update(self.extract_hostname(hostname_filter))
                 print("Running commands on {hostname}".format(**parsed_values))
 
-                commands_list = self.get_commmands_list()
                 commands_output = [
                     "Ping/Traceroute commands of {hostname}".format(**parsed_values)
                 ]
-                for show_command in commands_list:
+                for show_command in self.commands_list:
                     commands_output.append(
                         "\n" + ("-" * 60) + "\n\n" + show_command + "\n\n"
                     )
@@ -207,7 +229,9 @@ class DeviceInfo:
                 return result
                 # yield result
 
-        # except netdev.exceptions.DisconnectError as e:
+        # except SSHErrors(ip_address) as e:
+        #     print(e)
+
         except Exception as e:
             exception_msg = "Unable to login to device " + ip_address + "\n"
             exception_msg += str(e)
@@ -220,7 +244,7 @@ class DeviceInfo:
             print(e)
             return result
 
-    async def commands_output_netmiko(self, ip_address):
+    async def commands_output_netmiko(self, ip_address: str) -> dict[str, str]:
         """
         Login and run list of commands from file on all devices on the site
 
@@ -246,11 +270,11 @@ class DeviceInfo:
                     or self.device_type == "cisco_nxos"
                     or self.device_type == "arista_eos"
                 ):
-                    hostname_filter = await device_conn.send_command(
+                    hostname_filter = device_conn.send_command(
                         "show run | include hostname"
                     )
                 elif self.device_type == "juniper_junos":
-                    hostname_filter = await device_conn.send_command(
+                    hostname_filter = device_conn.send_command(
                         "show configuration | display set | match host-name"
                     )
                 elif self.device_type == "linux":
@@ -261,11 +285,10 @@ class DeviceInfo:
                 parsed_values.update(self.extract_hostname(hostname_filter))
                 print("Running commands on {hostname}".format(**parsed_values))
 
-                commands_list = self.get_commmands_list()
                 commands_output = [
                     "Ping/Traceroute commands of {hostname}".format(**parsed_values)
                 ]
-                for show_command in commands_list:
+                for show_command in self.commands_list:
                     commands_output.append(
                         "\n" + ("-" * 60) + "\n\n" + show_command + "\n\n"
                     )
@@ -293,7 +316,7 @@ class DeviceInfo:
             print(e)
             return result
 
-    async def configure_from_file(self, ip_address):
+    async def configure_from_file(self, ip_address: str) -> dict[str, str]:
         """
         Login and run list of commands from file on all devices on the site
 
@@ -329,7 +352,7 @@ class DeviceInfo:
                         "show configuration | display set | match host-name"
                     )
                 elif self.device_type == "linux":
-                    hostname_filter = device_conn.send_command("hostname")
+                    hostname_filter = await device_conn.send_command("hostname")
                 else:
                     print("Cannot determine hostname for this device")
 
