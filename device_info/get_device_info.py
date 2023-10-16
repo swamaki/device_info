@@ -15,17 +15,17 @@ async def main():
 
     # device_type = "cisco_ios"
     # device_type = "arista_eos"
-    # device_type = "juniper_junos"
-    device_type = "linux"
+    device_type = "juniper_junos"
+    # device_type = "linux"
 
     connection_params = SetConnectionParams(device_type)
     device_params = connection_params.set_params()
 
     devices_file = device_params["devices_file"]
-    ip_list = connection_params.open_yaml_file(devices_file)["devices"]
+    ip_list = connection_params.load_yaml_file(devices_file)["devices"]
 
     commands_file = device_params["commands_file"]
-    commands_list = connection_params.open_yaml_file(commands_file)["commands"]
+    commands_list = connection_params.load_yaml_file(commands_file)["commands"]
 
     global_device_params = device_params["global_device_params"]
 

@@ -19,10 +19,10 @@ async def main():
     device_params = connection_params.set_params()
 
     devices_file = device_params["devices_file"]
-    ip_list = connection_params.open_yaml_file(devices_file)["devices"]
+    ip_list = connection_params.load_yaml_file(devices_file)["devices"]
 
     commands_file = device_params["commands_file"]
-    commands_list = connection_params.open_yaml_file(commands_file)["commands"]
+    commands_list = connection_params.load_yaml_file(commands_file)["commands"]
 
     global_device_params = device_params["global_device_params"]
 
