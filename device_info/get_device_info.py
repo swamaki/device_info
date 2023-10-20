@@ -15,7 +15,8 @@ async def main():
 
     # device_type = "cisco_ios"
     # device_type = "arista_eos"
-    device_type = "juniper_junos"
+    # device_type = "juniper_junos"
+    device_type = "cumulus_vx"
     # device_type = "linux"
 
     connection_params = SetConnectionParams(device_type)
@@ -37,10 +38,9 @@ async def main():
             for ip in ip_list
         ]
         results = await asyncio.gather(*tasks)
-    else:
+    else:  # use for netdev supported platforms
         tasks = [asyncio.create_task(device_info.commands_output(ip)) for ip in ip_list]
         results = await asyncio.gather(*tasks)
-        # print(type(device_info.commands_output(ip)) for ip in ip_list)
 
     for result in results:
         device_info.save_output(result["device_hostname"], result["commands_output"])

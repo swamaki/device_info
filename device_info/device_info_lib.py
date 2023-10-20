@@ -72,6 +72,11 @@ class SetConnectionParams:
             devices_file = "devices_files/linux_devices.yml"
             username = decouple.config("LINUX_ADMIN")
             password = decouple.config("PASSWORD")
+        elif self.device_type == "cumulus_vx":
+            commands_file = "commands_files/linux_commands.yml"
+            devices_file = "devices_files/linux_devices.yml"
+            username = decouple.config("LINUX_ADMIN")
+            password = decouple.config("PASSWORD")
         else:
             commands_file = "commands_files/cisco_commands.yml"
             devices_file = "devices_files/cisco_devices.yml"
@@ -131,8 +136,10 @@ class DeviceInfo:
         ):
             hostname_regexp = [re.compile(r"(hostname\s+)(?P<hostname>\S+)", re.M)]
         elif self.device_type == "juniper_junos":
-            hostname_regexp = [re.compile(r"(host-name\s+)(?P<hostname>\S+)", re.M)]
+            hostname_regexp = [re.compile(r"(host-name\s+)(?P<hostname>\S+)(\;)", re.M)]
         elif self.device_type == "linux":
+            hostname_regexp = [re.compile(r"(?P<hostname>\S+)", re.M)]
+        elif self.device_type == "cumulus_vx":
             hostname_regexp = [re.compile(r"(?P<hostname>\S+)", re.M)]
         else:  # other platform versions
             hostname_regexp = [re.compile(r"(hostname\s+)(?P<hostname>\S+)", re.M)]
@@ -201,9 +208,11 @@ class DeviceInfo:
                     )
                 elif self.device_type == "juniper_junos":
                     hostname_filter = await device_conn.send_command(
-                        "show configuration | display set | match host-name"
+                        "show configuration system host-name"
                     )
                 elif self.device_type == "linux":
+                    hostname_filter = await device_conn.send_command("hostname")
+                elif self.device_type == "cumulus_vx":
                     hostname_filter = await device_conn.send_command("hostname")
                 else:
                     print("Cannot determine hostname for this device")
@@ -275,7 +284,7 @@ class DeviceInfo:
                     )
                 elif self.device_type == "juniper_junos":
                     hostname_filter = device_conn.send_command(
-                        "show configuration | display set | match host-name"
+                        "show configuration system host-name"
                     )
                 elif self.device_type == "linux":
                     hostname_filter = device_conn.send_command("hostname")
@@ -349,12 +358,16 @@ class DeviceInfo:
                     )
                 elif self.device_type == "juniper_junos":
                     hostname_filter = await device_conn.send_command(
-                        "show configuration | display set | match host-name"
+                        "show configuration system host-name"
                     )
                 elif self.device_type == "linux":
                     hostname_filter = await device_conn.send_command("hostname")
+                elif self.device_type == "cumulus_vx":
+                    hostname_filter = await device_conn.send_command("hostname")
                 else:
-                    print("Cannot determine hostname for this device")
+                    print(
+                        "configure_from_file - Cannot determine hostname for this device"
+                    )
 
                 parsed_values.update(self.extract_hostname(hostname_filter))
 
