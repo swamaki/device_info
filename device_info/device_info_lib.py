@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import datetime
 from pytz import timezone
 import re
@@ -7,26 +5,6 @@ import yaml
 import netdev
 from netmiko import ConnectHandler
 import decouple
-
-
-class SSHErrors(Exception):
-    # pass
-    # except netdev.exceptions.DisconnectError as e:
-    # except Exception as e:
-    def __init__(self, ip_address, exception_e):
-        self.ip_address = ip_address
-        self.exception_e = exception_e
-
-        exception_msg = "Unable to login to device " + ip_address + "\n"
-        exception_msg += str(exception_e)
-        exception_msg += "\n" + ("=" * 80) + "\n"
-        result = {
-            "device_hostname": ip_address,
-            "commands_output": exception_msg,
-        }
-        print("Unable to login to device " + ip_address)
-        print(exception_e)
-        return result
 
 
 class SetConnectionParams:
@@ -163,17 +141,11 @@ class DeviceInfo:
 
         est = timezone("EST")
         time_now = datetime.datetime.now(est)
-        output_filename = "./outputs/%s_%.2i%.2i%i_%.2i%.2i%.2i.log" % (
-            device_hostname,
-            time_now.year,
-            time_now.month,
-            time_now.day,
-            time_now.hour,
-            time_now.minute,
-            time_now.second,
-        )
-        # output_filename = "%s.txt" % (device_hostname) #filenames without timestamps
+
+        output_filename = f"./outputs/{device_hostname}_{time_now.year:04d}{time_now.month:02d}{time_now.day:02d}_{time_now.hour:02d}{time_now.minute:02d}{time_now.second:02d}.log"
+        # output_filename = f"./outputs/{device_hostname}.log" #filenames without timestamps
         output_file = open(output_filename, "a")
+        print(time_now.hour, time_now.minute, time_now.second)
         output_file.write(commands_output)
         output_file.close
 
@@ -251,6 +223,7 @@ class DeviceInfo:
             }
             print("Unable to login to device " + ip_address)
             print(e)
+            raise
             return result
 
     async def commands_output_netmiko(self, ip_address: str) -> dict[str, str]:
