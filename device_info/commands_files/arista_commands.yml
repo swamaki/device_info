@@ -3,7 +3,8 @@ commands:
   # - show configuration | display set | no-more
   # - term len 0
   - show run | no-more
-  - show version
+  # - show version
+  # - show version | egrep "System|Serial"
 # - show module
 # - show cdp neighbor | ex SEP
 # - show cdp neighbor detail

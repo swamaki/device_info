@@ -13,8 +13,8 @@ from device_info_lib import DeviceInfo, SetConnectionParams
 async def main():
     start_time = time.time()
 
-    device_type = "cisco_ios"
-    # device_type = "arista_eos"
+    # device_type = "cisco_ios"
+    device_type = "arista_eos"
     # device_type = "juniper_junos"
     # device_type = "cumulus_vx"
     # device_type = "linux"

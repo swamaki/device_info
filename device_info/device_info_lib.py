@@ -142,8 +142,10 @@ class DeviceInfo:
         est = timezone("EST")
         time_now = datetime.datetime.now(est)
 
-        output_filename = f"./outputs/{device_hostname}_{time_now.year:04d}{time_now.month:02d}{time_now.day:02d}_{time_now.hour:02d}{time_now.minute:02d}{time_now.second:02d}.log"
-        # output_filename = f"./outputs/{device_hostname}.log" #filenames without timestamps
+        # output_filename = f"./outputs/{device_hostname}_{time_now.year:04d}{time_now.month:02d}{time_now.day:02d}_{time_now.hour:02d}{time_now.minute:02d}{time_now.second:02d}.log"
+        output_filename = (
+            f"./outputs/{device_hostname}.log"  # filenames without timestamps
+        )
         output_file = open(output_filename, "a")
         output_file.write(commands_output)
         output_file.close
