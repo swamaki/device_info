@@ -2,6 +2,7 @@ commands:
   - nv show system
   - nv config show -o commands
   - nv config show
+  - nv show interface
   - cat /etc/nvue.d/startup.yaml
   # - sudo vtysh
   # - show run

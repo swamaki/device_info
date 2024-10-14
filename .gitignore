@@ -5,4 +5,4 @@ device_info/1_output_notes.txt
 device_info/1_show_version_output.txt
 device_info/outputs/*
 
-!device_info/outputs/.gitkeep
+# !device_info/outputs/.gitkeep

@@ -144,7 +144,7 @@ class DeviceInfo:
 
         # output_filename = f"./outputs/{device_hostname}_{time_now.year:04d}{time_now.month:02d}{time_now.day:02d}_{time_now.hour:02d}{time_now.minute:02d}{time_now.second:02d}.log"
         output_filename = (
-            f"./outputs/{device_hostname}.log"  # filenames without timestamps
+            f"./outputs/{device_hostname}.cfg"  # filenames without timestamps
         )
         output_file = open(output_filename, "a")
         output_file.write(commands_output)
@@ -194,14 +194,21 @@ class DeviceInfo:
                 print("Running commands on {hostname}".format(**parsed_values))
 
                 commands_output = [
-                    "Ping/Traceroute commands of {hostname}".format(**parsed_values)
+                    "! Output of Commands on {hostname}".format(**parsed_values)
                 ]
                 for show_command in self.commands_list:
                     commands_output.append(
-                        "\n" + ("-" * 60) + "\n\n" + show_command + "\n\n"
+                        "\n"
+                        + "! "
+                        + ("-" * 13)
+                        + " "
+                        + show_command
+                        + " "
+                        + ("-" * 13)
+                        + "\n\n"
                     )
                     commands_output.append(await device_conn.send_command(show_command))
-                commands_output.append("\n" + ("=" * 80) + "\n")
+                commands_output.append("\n" + "! " + ("=" * 80) + "\n")
                 all_commands_output = "\n".join(commands_output)
 
                 result = {

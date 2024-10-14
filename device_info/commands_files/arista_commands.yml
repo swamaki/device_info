@@ -5,42 +5,42 @@ commands:
   - show run | no-more
   # - show version
   # - show version | egrep "System|Serial"
-# - show module
-# - show cdp neighbor | ex SEP
-# - show cdp neighbor detail
-# - show ip interface brief | exclude unass
-# - show standby brief
-# - show interface status
-# - show interface status | include connected
-# - show interface trunk
-# - show int etherchannel
-# - show etherchannel summary
-# - show interface description
-# - show vtp status
-# - show vlan
-# - show vlan brief
-# - show spanning-tree root
-# - show spanning-tree brief
-# - show ip route
-# - show ip default
-# - show ip eigrp neighbors
-# - show ip eigrp interface
-# - show ip route eigrp
-# - show ip eigrp topology
-# - show ip ospf neig
-# - show ip ospf interface
-# - show ip route ospf
-# - show ip ospf database
-# - show ip bgp summary
-# - show ip bgp
-# - show ip route bgp
-# - show ip route static
-# - show ip route
-# - show ip pim neighbor
-# - show ip rp mapping
-# - show ip mroute
-# - show proc cpu sorted
-# - show proc cpu history
+  # - show module
+  # - show cdp neighbor | ex SEP
+  # - show cdp neighbor detail
+  # - show ip interface brief | exclude unass
+  # - show standby brief
+  # - show interface status
+  # - show interface status | include connected
+  # - show interface trunk
+  # - show int etherchannel
+  # - show etherchannel summary
+  # - show interface description
+  # - show vtp status
+  # - show vlan
+  # - show vlan brief
+  # - show spanning-tree root
+  # - show spanning-tree brief
+  # - show ip route
+  # - show ip default
+  # - show ip eigrp neighbors
+  # - show ip eigrp interface
+  # - show ip route eigrp
+  # - show ip eigrp topology
+  # - show ip ospf neig
+  # - show ip ospf interface
+  # - show ip route ospf
+  # - show ip ospf database
+  # - show ip bgp summary
+  # - show ip bgp
+  # - show ip route bgp
+  # - show ip route static
+  # - show ip route
+  # - show ip pim neighbor
+  # - show ip rp mapping
+  # - show ip mroute
+  # - show proc cpu sorted
+  # - show proc cpu history
 
 #==============================
 
@@ -69,3 +69,42 @@ commands:
 # - show pim neighbor
 # - show pim rps
 # - show route protocol pim
+
+  # - ping 10.0.0.243 so lo0
+  # - ping 10.0.0.244 so lo0
+  # - ping 10.0.0.245 so lo0
+  # - ping 10.255.0.1 so lo0
+  # - ping 10.255.0.2 so lo0
+  # - ping 10.255.0.101 so lo0
+  # - ping 10.255.0.102 so lo0
+  # - ping 10.255.0.103 so lo0
+  # - ping 10.255.0.104 so lo0
+
+
+#=============autovpn verifications=================
+
+  # - show stun client translations
+  # - show stun server bindings
+  # - show ip security connection
+
+  # - show bgp summary 
+  # - show bgp evpn summary
+  # - show bgp evpn route-type ip-prefix ipv4
+
+  # - show bgp path-selection summary 
+  # - show bgp path-selection 
+  # - show path-selection paths
+
+  # - show ip route interface Dp1
+  # - sh ip route vrf all | no 
+
+  # - show monitor telemetry path characteristics
+  # - show monitor telemetry path counters
+  # - show flow telemetry ipfix counters
+  # - show flow telemetry ipfix flow-table
+
+  # - show path-selection load-balance counters
+
+  # - show stun server bindings detail 
+  # - show stun client translations detail 
+  # - show  ip security connection detail 
