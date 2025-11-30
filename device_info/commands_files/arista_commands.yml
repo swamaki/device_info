@@ -2,8 +2,8 @@ commands:
   # - show configuration | no-more
   # - show configuration | display set | no-more
   # - term len 0
-  # - show run | no-more
-  # - show version
+  - show run | no-more
+  - show version
   # - show version | egrep "System|Serial"
   # - show module
   # - show cdp neighbor | ex SEP
@@ -41,10 +41,10 @@ commands:
   # - show ip mroute
   # - show proc cpu sorted
   # - show proc cpu history
-  - show run |  grep 'access vlan 25[0-9][0-9]'
-  - show run sec interface Ethernet |  grep -e 'access vlan 25[0-9][0-9]' -e Ethernet
-  - show run sec interface Ethernet |  grep -E 'access vlan 25[0-9][0-9]' | grep -E 'Ethernet'
-  - show run |  grep -E 'mode trunk' | grep -E 'Ethernet'
+  # - show run |  grep 'access vlan 25[0-9][0-9]'
+  # - show run sec interface Ethernet |  grep -e 'access vlan 25[0-9][0-9]' -e Ethernet
+  # - show run sec interface Ethernet |  grep -E 'access vlan 25[0-9][0-9]' | grep -E 'Ethernet'
+  # - show run |  grep -E 'mode trunk' | grep -E 'Ethernet'
 
 #==============================
 
