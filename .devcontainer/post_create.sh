@@ -1,27 +1,43 @@
 #!/usr/bin/env bash
-set -e
+# set -e
 
-echo "Installing ZSH Autosuggestions..."
-sh .devcontainer/install_autosuggestions.sh
+echo -e "\n=============== \e[1;30;42m Installing ZSH Autosuggestions... \e[0m ===============\n"
 
-echo "Installing Asyncio netdev..."
-sh .devcontainer/install_netdev.sh
+# Install zsh-autosuggestions plugin
+git clone https://github.com/zsh-users/zsh-autosuggestions \
+    ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 
-echo "Upgrading pip..."
-pip install --upgrade pip
+# Make sure .zshrc exists
+if [ ! -f ~/.zshrc ]; then
+    cp /usr/share/oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
+fi
 
-echo "Installing other python dependencies..."
-pip install -r .devcontainer/requirements.txt 
+# Add plugin if not already added
+if ! grep -q "zsh-autosuggestions" ~/.zshrc; then
+    sed -i 's/plugins=(/plugins=(zsh-autosuggestions /' ~/.zshrc
+fi
 
-echo "Setting up environment..."
-sudo apt-get update
-sudo apt-get install -y git
-sudo apt-get install -y curl
-sudo apt-get install -y iputils-ping
-sudo apt-get install -y fping
-# sudo apt-get -y clean && rm -rf /var/lib/apt/lists/*
+echo -e "\n=============== \e[1;30;42m Autosuggestions installed. \e[0m ===============\n"
 
-echo "Loading ENV variables..."
-source .devcontainer/.env
-echo "✅ loaded .env"
 
+# echo -e "\n=============== \e[1;30;42m Upgrading pip... \e[0m ===============\n"
+# pip install --upgrade pip
+
+# echo -e "\n=============== \e[1;30;42m Installing ANTA... \e[0m ===============\n"
+# pip install 'anta[cli]'
+
+# echo -e "\n=============== \e[1;30;42m Setting up environment... \e[0m ===============\n"
+# sudo apt-get update
+# sudo apt-get install -y git
+# sudo apt-get install -y wget
+# sudo apt-get install -y curl
+# sudo apt-get install -y iputils-ping
+# sudo apt-get install -y fping
+
+echo -e "\n=============== \e[1;30;42m ✅ loaded vars in .env for ANTA  \e[0m ===============\n"
+
+echo -e "\n=============== \e[1;30;42m Installing Asyncio netdev...  \e[0m ===============\n"
+rm -rf /tmp/netdev/
+git clone https://github.com/swamaki/netdev.git /tmp/netdev/
+pip install /tmp/netdev/
+rm -rf /tmp/netdev/

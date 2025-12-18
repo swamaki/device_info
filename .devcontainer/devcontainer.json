@@ -16,7 +16,10 @@
       ]
     }
   },
-  // "postCreateCommand": "pip install --upgrade pip",
-  "postCreateCommand": "bash .devcontainer/post_create.sh",
-  "remoteUser": "vscode"
+  "postCreateCommand": "zsh -c '.devcontainer/post_create.sh && source ~/.zshrc'",
+  // "remoteUser": "vscode",
+  "runArgs": [
+    "--env-file",
+    ".devcontainer/.env"
+  ]
 }
