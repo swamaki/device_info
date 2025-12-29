@@ -12,7 +12,7 @@ class SetConnectionParams:
         self.device_type = device_type
 
     def set_params(self):
-        """
+        """ 
         Set parameters for the commands_files, devices_files and
         retrieve username/password from .env file via python-decouple
 
@@ -32,9 +32,9 @@ class SetConnectionParams:
 
         global_device_params = device_params["global_device_params"]
 
-        device_info = DeviceInfo(commands_list, global_device_params)
-
+        device_info = DeviceInfo(commands_list, global_device_params) 
         """
+
         if self.device_type == "arista_eos":
             commands_file = "commands_files/arista_commands.yml"
             devices_file = "devices_files/arista_devices.yml"

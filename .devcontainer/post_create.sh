@@ -1,7 +1,27 @@
 #!/usr/bin/env bash
 # set -e
 
-echo -e "\n=============== \e[1;30;42m Installing ZSH Autosuggestions... \e[0m ===============\n"
+#------------------------------------------------------------
+######################### setup #########################
+#------------------------------------------------------------
+
+# Define color variables
+# 0 = Black, 1 = red, 2 = Green, 3 = yellow, 4 = blue, 7 = white
+BLACK_FG := $(shell tput setaf 0)
+GREEN_BG := $(shell tput setab 2)
+YELLOW_BG := $(shell tput setab 3)
+RESET  := $(shell tput sgr0)
+BOLD   := $(shell tput bold)
+
+# Style
+HEADER_START := \n=============== $(BOLD)$(BLACK_FG)$(YELLOW_BG)
+HEADER_END   := $(RESET) ===============\n
+
+#------------------------------------------------------------
+########################## script ###########################
+#------------------------------------------------------------
+
+echo -e "$(HEADER_START) Installing ZSH Autosuggestions... $(HEADER_END)"
 
 # Install zsh-autosuggestions plugin
 git clone https://github.com/zsh-users/zsh-autosuggestions \
@@ -17,16 +37,16 @@ if ! grep -q "zsh-autosuggestions" ~/.zshrc; then
     sed -i 's/plugins=(/plugins=(zsh-autosuggestions /' ~/.zshrc
 fi
 
-echo -e "\n=============== \e[1;30;42m Autosuggestions installed. \e[0m ===============\n"
+echo -e "$(HEADER_START) Autosuggestions installed. $(HEADER_END)"
 
 
-# echo -e "\n=============== \e[1;30;42m Upgrading pip... \e[0m ===============\n"
+# echo -e "$(HEADER_START) Upgrading pip... $(HEADER_END)"
 # pip install --upgrade pip
 
-# echo -e "\n=============== \e[1;30;42m Installing ANTA... \e[0m ===============\n"
+# echo -e "$(HEADER_START) Installing ANTA... $(HEADER_END)"
 # pip install 'anta[cli]'
 
-# echo -e "\n=============== \e[1;30;42m Setting up environment... \e[0m ===============\n"
+# echo -e "$(HEADER_START) Setting up environment... $(HEADER_END)"
 # sudo apt-get update
 # sudo apt-get install -y git
 # sudo apt-get install -y wget
@@ -34,9 +54,9 @@ echo -e "\n=============== \e[1;30;42m Autosuggestions installed. \e[0m ========
 # sudo apt-get install -y iputils-ping
 # sudo apt-get install -y fping
 
-echo -e "\n=============== \e[1;30;42m ✅ loaded vars in .env for ANTA  \e[0m ===============\n"
+echo -e "$(HEADER_START) ✅ loaded vars in .env for ANTA  $(HEADER_END)"
 
-echo -e "\n=============== \e[1;30;42m Installing Asyncio netdev...  \e[0m ===============\n"
+echo -e "$(HEADER_START) Installing Asyncio netdev...  $(HEADER_END)"
 rm -rf /tmp/netdev/
 git clone https://github.com/swamaki/netdev.git /tmp/netdev/
 pip install /tmp/netdev/
