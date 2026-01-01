@@ -6,7 +6,7 @@
 #------------------------------------------------------------
 
 # Define color variables
-# 0 = Black, 1 = red, 2 = Green, 3 = yellow, 4 = blue, 7 = white
+# 0 = Black, 1 = Red, 2 = Green, 3 = Yellow, 4 = Blue, 7 = White
 BLACK_FG := $(shell tput setaf 0)
 GREEN_BG := $(shell tput setab 2)
 YELLOW_BG := $(shell tput setab 3)
